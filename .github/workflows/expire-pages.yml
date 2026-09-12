@@ -1,0 +1,21 @@
+name: Expire temporary review site
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+permissions:
+  pages: write
+
+jobs:
+  expire:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Disable the site after its expiry
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          test "$(date -u +%s)" -ge 1789499011 || exit 0
+          gh api "repos/$GITHUB_REPOSITORY/pages" >/dev/null 2>&1 || exit 0
+          gh api --method DELETE "repos/$GITHUB_REPOSITORY/pages"
